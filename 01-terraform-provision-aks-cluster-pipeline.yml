@@ -20,8 +20,31 @@ stages:
         continueOnError: false
         steps:
         - task: PublishPipelineArtifact@1
-          displayName: Publish Artifacts
+          displayName: Publish Pipeline
           inputs:
-            targetPath: '$(System.DefaultWorkingDirectory)/terraform-manifests
+            targetPath: '$(Pipeline.Workspace)/terraform-manifests'
             artifact: 'terraform-manifests-out'
             publishLocation: 'pipeline'
+        - task: TerraformInstaller@2
+          displayName: Terraform Installation
+          inputs:
+            terraformVersion: 'latest'
+        - task: TerraformCLI@2
+          displayName: Terrafrom Init
+          inputs:
+            command: 'init'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform-manifests'
+            backendType: 'azurerm'
+            backendServiceArm: 'Azure service connection'
+            backendAzureRmResourceGroupName: 'terraform-storage-rg'
+            backendAzureRmStorageAccountName: 'tfstateassetenv'
+            backendAzureRmContainerName: 'tfstatefiles'
+            backendAzureRmKey: 'tf-base.tfstate'
+            allowTelemetryCollection: false
+        - task: TerraformCLI@2
+          displayName: Validate Terraform
+          inputs:
+            command: 'validate'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform-manifests'
+            allowTelemetryCollection: false
+        
