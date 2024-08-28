@@ -22,11 +22,15 @@ stages:
       - job: TerraformValidateJob
         continueOnError: false
         steps:
+        - script: |
+            mkdir $(Pipeline.Workspace)\terraform-manifests
+            copy $(Build.SourcesDirectory)\azure-devops-aks-provision-pipeline\terraform-manifests\* $(Pipeline.Workspace)\terraform-manifests\
+          displayName: 'Copy Files for Testing'
         - task: PublishPipelineArtifact@1
           displayName: Publish Pipeline
           inputs:
-            # targetPath: '$(Pipeline.Workspace)/terraform-manifests'
-            targetPath: '$(Build.SourcesDirectory)\azure-devops-aks-provision-pipeline\terraform-manifests'
+            targetPath: '$(Pipeline.Workspace)/terraform-manifests'
+            # targetPath: '$(Build.SourcesDirectory)\azure-devops-aks-provision-pipeline\terraform-manifests'
             artifact: 'terraform-manifests-out'
             publishLocation: 'pipeline'
         - task: TerraformInstaller@2
